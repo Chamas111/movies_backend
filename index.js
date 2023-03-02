@@ -7,6 +7,10 @@ app.use(express.json());
 const pool = new Pool({
   connectionString: process.env.ELEPHANT_SQL_CONNECTION_STRING,
 });
+const cors = require("cors");
+// Body Parser
+app.use(express.json());
+app.use(cors());
 
 app.get("/", (req, res) => {
   res.send("<h1>hello world</h1>");
