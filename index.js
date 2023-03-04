@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
 require("dotenv").config();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 9000;
 const { Pool } = require("pg");
 app.use(express.json());
 const pool = new Pool({
@@ -11,6 +11,46 @@ const cors = require("cors");
 // Body Parser
 app.use(express.json());
 app.use(cors());
+
+//Middleware Validations
+const validateMovie = (req, res, next) => {
+  const requiredFields = [
+    "title",
+    "genre",
+    "country",
+    "url",
+    "year",
+    "duration",
+  ];
+  for (const field of requiredFields) {
+    if (!req.body[field]) {
+      return res.status(400).json({ message: `${field} is required` });
+    }
+  }
+  next();
+};
+
+const validateMinOneField = (req, res, next) => {
+  const requiredFields = [
+    "title",
+    "genre",
+    "country",
+    "url",
+    "year",
+    "duration",
+  ];
+  const minOneField = false;
+  for (const field of requiredFields) {
+    if (req.body[field]) {
+      minOneField = true;
+      break;
+    }
+  }
+  if (!minOneField) {
+    return res.status(400).json({ message: `At least one field is required` });
+  }
+  next();
+};
 
 app.get("/", (req, res) => {
   res.send("<h1>hello world</h1>");
@@ -53,7 +93,7 @@ app.get("/api/movies/:movie_id", (req, res) => {
     "duration": 88
 
     */
-app.post("/api/movies/", (req, res) => {
+app.post("/api/movies/", validateMovie, (req, res) => {
   const { title, genre, country, url, year, duration } = req.body;
 
   pool
@@ -71,9 +111,10 @@ app.post("/api/movies/", (req, res) => {
 
 // Update movie
 
-app.put("/api/movies/:movie_id", (req, res) => {
+app.put("/api/movies/:movie_id", validateMinOneField, (req, res) => {
   const movie_id = req.params.movie_id;
   const { title, genre, country, url, year, duration } = req.body;
+  console.log(genre);
 
   pool
     .query(
