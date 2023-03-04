@@ -39,7 +39,7 @@ const validateMinOneField = (req, res, next) => {
     "year",
     "duration",
   ];
-  const minOneField = false;
+  let minOneField = false;
   for (const field of requiredFields) {
     if (req.body[field]) {
       minOneField = true;
